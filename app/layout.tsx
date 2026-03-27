@@ -16,13 +16,13 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "BuildRight Construction — Licensed Contractors | Free Instant Estimates",
+  title: "Concrete MLS — Concrete Specialists | Free Instant Estimates",
   description:
-    "Professional roofing, new construction, and concrete work in Texas. Get a free AI-powered estimate in 2 minutes. Licensed, insured, 12+ years of experience.",
-  keywords: ["contractor", "roofing", "new construction", "concrete", "Texas", "free estimate"],
+    "Driveways, foundations, slabs, retaining walls, and decorative concrete in Texas. Get a free AI-powered estimate in 2 minutes. Licensed, insured, 15+ years of experience.",
+  keywords: ["concrete", "driveway", "foundation", "slab", "retaining wall", "flatwork", "Texas", "free estimate"],
   openGraph: {
-    title: "BuildRight Construction — Licensed Contractors",
-    description: "Get your free instant estimate in 2 minutes. No calls, no waiting.",
+    title: "Concrete MLS — Concrete Specialists",
+    description: "Get your free concrete estimate in 2 minutes. No calls, no waiting.",
     type: "website",
   },
 };

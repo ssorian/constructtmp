@@ -1,8 +1,8 @@
 export const CONTENT = {
   navbar: {
     logo: {
-      part1: "BUILD",
-      part2: "RIGHT",
+      part1: "CONCRETE",
+      part2: "MLS",
     },
     links: [
       { label: "Services", href: "#services" },
@@ -15,17 +15,17 @@ export const CONTENT = {
   hero: {
     heroImage: "/Hero.jpg",
     stats: {
-      projects: "500+ Projects",
+      projects: "600+ Projects",
       licensed: "Licensed & Insured",
-      experience: "12 Years Experience",
+      experience: "15 Years Experience",
       rating: "5-Star",
     },
     headline: {
-      part1: "BUILT RIGHT.",
-      part2: "QUOTED IN MINUTES.",
+      part1: "CONCRETE WORK.",
+      part2: "BUILT TO LAST.",
     },
     subheadline:
-      "Roofing, new construction, and concrete work done by licensed professionals. Get your free estimate instantly — no calls, no waiting.",
+      "Driveways, foundations, slabs, retaining walls, and decorative concrete — done by licensed professionals. Get your free estimate instantly, no calls, no waiting.",
     primaryCta: "Get My Free Estimate →",
     secondaryCta: "View Our Projects",
   },
@@ -34,36 +34,37 @@ export const CONTENT = {
     "Free Estimates",
     "5-Star Google Rated",
     "Locally Owned & Operated",
-    "12+ Years in Business",
+    "15+ Years in Business",
   ],
   services: {
-    label: "What We Build",
+    label: "What We Pour",
     title: "Our Services",
     subtitle:
-      "Licensed, insured, and experienced in all aspects of residential and commercial construction.",
+      "Specialists in residential and commercial concrete — from simple slabs to large-scale structural work.",
     items: [
       {
-        id: "roofing",
-        title: "Roofing",
-        query: "roofing shingles repair",
+        id: "driveways",
+        title: "Driveways & Parking",
+        query: "concrete driveway residential",
         seed: "svc-roof",
         description:
-          "Residential and commercial roofing repairs, full replacements, and inspections. We work with all materials including shingle, metal, and flat roofs.",
+          "Custom concrete driveways and parking areas for homes and businesses. Smooth finish, stamped, or exposed aggregate — built for heavy use and long life.",
       },
       {
-        id: "construction",
-        title: "New Construction",
-        query: "new home construction foundation",
+        id: "foundations",
+        title: "Foundations & Slabs",
+        query: "concrete foundation slab construction",
         seed: "svc-newcon",
         description:
-          "Ground-up builds for residential and light commercial properties. From foundation to finish, we manage the full project.",
+          "Residential and commercial foundations, garage slabs, and equipment pads. Properly graded, reinforced, and poured to code every time.",
       },
       {
-        id: "concrete",
-        title: "Concrete & Masonry",
-        query: "concrete driveway masonry",
+        id: "retaining",
+        title: "Retaining Walls & Flatwork",
+        query: "concrete retaining wall masonry",
         seed: "svc-concrete",
-        description: "Driveways, foundations, retaining walls, and decorative concrete work. Built to last.",
+        description:
+          "Retaining walls, patios, walkways, curbs, and decorative flatwork. We handle any scope — from a backyard patio to a full commercial lot.",
       },
     ],
     learnMore: "Learn More",
@@ -71,52 +72,52 @@ export const CONTENT = {
   howItWorks: {
     label: "Simple Process",
     title: "How It Works",
-    subtitle: "No phone tags, no waiting. Get your estimate in 3 simple steps.",
+    subtitle: "No phone tags, no waiting. Get your concrete estimate in 3 simple steps.",
     steps: [
       {
         number: "01",
-        title: "Answer a few questions",
-        description: "Tell us about your project: type, size, and location. Takes less than 2 minutes.",
+        title: "Tell us about your project",
+        description: "Select the type of concrete work, approximate area, and your location. Takes less than 2 minutes.",
       },
       {
         number: "02",
         title: "Get your instant estimate",
-        description: "Our AI generates a realistic price range based on your project details and local market rates.",
+        description: "Our AI calculates a realistic price range based on your project specs, mix requirements, and local labor rates.",
       },
       {
         number: "03",
         title: "We'll follow up",
-        description: "One of our team members will reach out within 24 hours to confirm details and schedule a site visit.",
+        description: "A Concrete MLS crew member will reach out within 24 hours to confirm details and schedule a site visit.",
       },
     ]
   },
   portfolio: {
     label: "Recent Work",
     title: "Our Projects",
-    subtitle: "A sample of completed projects across Texas.",
+    subtitle: "A sample of concrete projects completed across the area.",
     projects: [
       {
         id: "port-1",
-        title: "Full Roof Replacement — 2,400 sq ft",
-        badge: "Roofing · Dallas, TX",
-        year: "Completed 2023",
-        query: "completed roofing project house",
+        title: "Residential Driveway — 1,800 sq ft Stamped Concrete",
+        badge: "Driveway · Dallas, TX",
+        year: "Completed 2024",
+        query: "stamped concrete driveway residential",
         seed: "port-1",
       },
       {
         id: "port-2",
-        title: "New Construction Build — 3BR Family Home",
-        badge: "New Construction · Austin, TX",
-        year: "Completed 2023",
-        query: "new house construction complete",
+        title: "Commercial Foundation Slab — 12,000 sq ft",
+        badge: "Foundation · Austin, TX",
+        year: "Completed 2024",
+        query: "concrete foundation slab commercial",
         seed: "port-2",
       },
       {
         id: "port-3",
-        title: "Commercial Concrete Driveway — 8,000 sq ft",
-        badge: "Concrete & Masonry · San Antonio, TX",
-        year: "Completed 2024",
-        query: "concrete driveway finished",
+        title: "Retaining Wall & Patio — 320 linear ft",
+        badge: "Retaining Wall · San Antonio, TX",
+        year: "Completed 2023",
+        query: "concrete retaining wall patio finished",
         seed: "port-3",
       },
     ]
@@ -124,38 +125,38 @@ export const CONTENT = {
   testimonials: {
     label: "Client Reviews",
     title: "What Our Clients Say",
-    subtitle: "Real feedback from homeowners and property managers across Texas.",
+    subtitle: "Real feedback from homeowners and property managers who trusted Concrete MLS.",
     items: [
       {
         name: "Michael R.",
         location: "Houston, TX",
-        project: "Roofing",
-        quote: "They replaced our entire roof in two days. The quote I got online matched exactly what we paid. No surprises.",
+        project: "Driveway",
+        quote: "They poured our entire driveway in one day. The stamped finish looks incredible — better than the neighbors'. No surprises on price.",
       },
       {
         name: "Sandra T.",
         location: "Austin, TX",
-        project: "New Construction",
-        quote: "Professional from start to finish. The new build came in on time and on budget. I'd hire them again without hesitation.",
+        project: "Foundation Slab",
+        quote: "Professional crew, perfectly level slab, done on schedule. Concrete MLS is the only company I'll call for this kind of work going forward.",
       },
       {
         name: "James L.",
         location: "Dallas, TX",
-        project: "Concrete & Masonry",
-        quote: "Best concrete work I've seen. Our driveway looks incredible and they cleaned up after themselves. Very happy.",
+        project: "Retaining Wall",
+        quote: "They solved a drainage problem we'd had for years. The retaining wall is solid, looks great, and they cleaned the site spotless when done.",
       },
     ]
   },
   whyUs: {
     label: "Why We're Different",
-    title: "Why BuildRight",
-    badgeTitle: "12+ Years",
-    badgeSubtitle: "Serving the area",
+    title: "Why Concrete MLS",
+    badgeTitle: "15+ Years",
+    badgeSubtitle: "Pouring concrete right",
     points: [
       {
         id: "licensed",
         title: "Licensed & Fully Insured",
-        desc: "Every project is covered. You're protected from day one.",
+        desc: "Every pour is covered. You're protected from day one.",
       },
       {
         id: "pricing",
@@ -164,43 +165,43 @@ export const CONTENT = {
       },
       {
         id: "experts",
-        title: "Local Experts",
-        desc: "We've worked in this market for over 12 years. We know the codes, climate, and contractors.",
+        title: "Concrete Specialists",
+        desc: "We do one thing and do it right. 15 years focused exclusively on concrete means better results on every job.",
       },
       {
         id: "turnaround",
         title: "Fast Turnaround",
-        desc: "Most projects start within 2 weeks of contract signing.",
+        desc: "Most projects start within 2 weeks of contract signing. We don't leave you waiting.",
       },
     ]
   },
   ctaBanner: {
-    title: "READY TO GET STARTED?",
-    subtitle: "Get your free estimate in 2 minutes. No calls, no commitment.",
+    title: "READY TO POUR?",
+    subtitle: "Get your free concrete estimate in 2 minutes. No calls, no commitment.",
     button: "Get My Free Estimate →",
   },
   footer: {
     brand: {
-      part1: "BUILD",
-      part2: "RIGHT",
-      description: "Licensed and insured construction professionals serving Texas. Roofing, new builds, and concrete work done right.",
+      part1: "CONCRETE",
+      part2: "MLS",
+      description: "Licensed and insured concrete specialists. Driveways, foundations, retaining walls, and flatwork — poured right the first time.",
     },
     navLabel: "Navigation",
     contactLabel: "Contact",
     contact: {
       phone: "(555) 000-0000",
-      email: "info@buildright.co",
+      email: "info@concretemls.com",
       location: "Houston, TX (serving all of Texas)",
     },
-    copyright: "© 2024 BuildRight Construction. All rights reserved.",
+    copyright: "© 2024 Concrete MLS. All rights reserved.",
     privacy: "Privacy Policy",
     terms: "Terms of Service",
-    disclaimer: "Estimates generated by AI are approximate. Final pricing subject to site inspection.",
+    disclaimer: "Estimates generated by AI are approximate. Final pricing subject to site inspection and material costs.",
   },
   quoteBot: {
     intro: {
       label: "Instant Estimate",
-      title: "Get Your Free Estimate",
+      title: "Get Your Free Concrete Estimate",
       subtitle: "Answer a few quick questions and get an AI-powered price range — no commitment, no spam.",
       cardTitle: "Ready for your estimate?",
       cardSubtitle: "Takes less than 2 minutes. Powered by AI — no generic ranges.",
@@ -214,7 +215,7 @@ export const CONTENT = {
     },
     loading: {
       title: "Generating your estimate...",
-      subtitle: "Analyzing market rates, materials, and labor costs for your area",
+      subtitle: "Analyzing concrete market rates, mix costs, and labor for your area",
     },
     result: {
       badge: "Your AI-Powered Estimate",
@@ -225,11 +226,11 @@ export const CONTENT = {
       formPlaceholder: "Your email address",
       formButton: "Send",
       successMessage: "✓  We'll reach out within 24 hours with your detailed quote.",
-      disclaimer: "This is an AI-generated estimate. Final pricing depends on a site inspection and may vary based on material costs, site conditions, and scope of work.",
+      disclaimer: "This is an AI-generated estimate. Final pricing depends on a site inspection and may vary based on concrete mix, reinforcement, site conditions, and scope of work.",
       startOverText: "Start over →",
       followUp: {
         title: "Have questions about your estimate?",
-        inputPlaceholder: "Ask anything about your estimate...",
+        inputPlaceholder: "Ask anything about your concrete project...",
         defaultReply: "I'm not sure, but feel free to call us for more details.",
         errorReply: "Sorry, I had trouble responding. Please call us for more details."
       }
@@ -238,85 +239,91 @@ export const CONTENT = {
     baseQuestions: [
       {
         key: "projectType",
-        text: "What type of project are you looking to get done?",
-        options: ["Roofing", "New Construction", "Concrete & Masonry", "Repair", "Other"],
+        text: "What type of concrete work are you looking to get done?",
+        options: ["Driveway / Parking", "Foundation / Slab", "Retaining Wall", "Patio / Walkway", "Other"],
         type: "choice",
       },
     ],
     adaptiveQuestions: {
-      "Roofing": [
+      "Driveway / Parking": [
         {
-          key: "roofType",
-          text: "What type of roof do you have?",
-          options: ["Asphalt shingles", "Metal roof", "Flat / TPO", "Tile", "Not sure"],
+          key: "finish",
+          text: "What finish are you looking for?",
+          options: ["Standard broom finish", "Stamped concrete", "Exposed aggregate", "Not sure"],
           type: "choice",
         },
         {
           key: "size",
-          text: "Approximate size of the roof?",
-          options: ["Small (under 1,000 sq ft)", "Medium (1,000–2,500 sq ft)", "Large (2,500+ sq ft)"],
+          text: "Approximate size of the driveway or parking area?",
+          options: ["Small (under 500 sq ft)", "Medium (500–1,500 sq ft)", "Large (1,500+ sq ft)"],
           type: "choice",
         },
         {
-          key: "roofIssue",
-          text: "What's the main issue?",
-          options: ["Full replacement", "Leak repair", "Storm damage", "Inspection only"],
+          key: "condition",
+          text: "Is this a new pour or a replacement?",
+          options: ["New pour", "Replacing existing concrete", "Expanding existing driveway"],
           type: "choice",
         },
       ],
-      "New Construction": [
+      "Foundation / Slab": [
         {
-          key: "constructionType",
-          text: "What are you building?",
-          options: ["Single-family home", "Addition / extension", "Commercial building", "Accessory structure (garage, barn)"],
+          key: "slabType",
+          text: "What type of slab or foundation?",
+          options: ["Residential foundation", "Garage slab", "Commercial slab", "Equipment / utility pad"],
           type: "choice",
         },
         {
           key: "size",
           text: "Approximate square footage?",
-          options: ["Under 1,000 sq ft", "1,000–2,500 sq ft", "2,500–5,000 sq ft", "5,000+ sq ft"],
+          options: ["Under 1,000 sq ft", "1,000–3,000 sq ft", "3,000–8,000 sq ft", "8,000+ sq ft"],
           type: "choice",
         },
         {
-          key: "constructionPhase",
-          text: "How far along is the planning?",
-          options: ["Just an idea", "Have blueprints", "Permits in process", "Ready to break ground"],
+          key: "reinforcement",
+          text: "Do you need rebar or post-tension reinforcement?",
+          options: ["Yes — rebar", "Yes — post-tension", "Not sure / need recommendation", "No reinforcement"],
           type: "choice",
         },
       ],
-      "Concrete & Masonry": [
+      "Retaining Wall": [
         {
-          key: "concreteType",
-          text: "What kind of concrete or masonry work?",
-          options: ["Driveway / parking", "Foundation / slab", "Retaining wall", "Patio / walkway", "Block wall"],
+          key: "wallType",
+          text: "What type of retaining wall?",
+          options: ["Poured concrete", "Concrete block / CMU", "Not sure"],
           type: "choice",
         },
         {
           key: "size",
-          text: "Approximate size of the area?",
-          options: ["Small (under 500 sq ft)", "Medium (500–1,500 sq ft)", "Large (1,500+ sq ft)"],
+          text: "Approximate length and height of the wall?",
+          options: ["Short (under 50 linear ft)", "Medium (50–150 linear ft)", "Long (150+ linear ft)"],
+          type: "choice",
+        },
+        {
+          key: "drainage",
+          text: "Do you need drainage work behind the wall?",
+          options: ["Yes", "No", "Not sure"],
           type: "choice",
         },
       ],
-      "Repair": [
+      "Patio / Walkway": [
         {
-          key: "repairType",
-          text: "What needs repairing?",
-          options: ["Roof / ceiling", "Foundation / structure", "Concrete / driveway", "Siding / exterior", "Other"],
+          key: "finish",
+          text: "What finish do you want?",
+          options: ["Standard broom finish", "Stamped / decorative", "Exposed aggregate", "Colored concrete", "Not sure"],
           type: "choice",
         },
         {
           key: "size",
-          text: "How extensive is the damage?",
-          options: ["Minor (cosmetic)", "Moderate (functional)", "Severe (structural)"],
+          text: "Approximate area?",
+          options: ["Small (under 300 sq ft)", "Medium (300–800 sq ft)", "Large (800+ sq ft)"],
           type: "choice",
         },
       ],
       "Other": [
         {
           key: "otherDescription",
-          text: "Describe the project briefly.",
-          placeholder: "e.g. demolish old shed and pour a new pad",
+          text: "Describe the concrete work briefly.",
+          placeholder: "e.g. curb and gutter along 200 ft of parking lot",
           type: "text",
         },
         {
@@ -343,7 +350,7 @@ export const CONTENT = {
       {
         key: "notes",
         text: "Any additional details you'd like us to know?",
-        placeholder: "Optional — describe your project",
+        placeholder: "Optional — soil conditions, access issues, special requirements",
         type: "text-optional",
       },
     ]
