@@ -1,26 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronRight, ArrowRight, Phone, Mail, TriangleAlert } from "lucide-react";
+import { ChevronRight, ArrowRight, Phone, Mail, CheckCircle } from "lucide-react";
 import { CONTENT } from "@/lib/content";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
-type Step = "intro" | "questions" | "result";
-
-interface QuoteResult {
-  low: number;
-  high: number;
-  summary: string;
-  breakdown: string[];
-}
+type Step = "intro" | "questions" | "done";
 
 interface Answers {
-  projectType: string;
-  size: string;
-  finish?: string;
-  timeline: string;
-  location: string;
-  notes: string;
   [key: string]: string | undefined;
 }
 
@@ -33,70 +20,36 @@ type QuestionNode = {
   placeholder?: string;
 };
 
-const baseQuestions: QuestionNode[]                        = CONTENT.quoteBot.baseQuestions as QuestionNode[];
-const adaptiveQuestions: Record<string, QuestionNode[]>    = CONTENT.quoteBot.adaptiveQuestions as Record<string, QuestionNode[]>;
-const sharedTailQuestions: QuestionNode[]                  = CONTENT.quoteBot.sharedTailQuestions as QuestionNode[];
-
-/* ─── Static estimate calculator ───────────────────────────────────── */
-function computeResult(answers: Partial<Answers>): QuoteResult {
-  const pricing = CONTENT.quoteBot.pricing as Record<string, {
-    ranges: Record<string, { low: number; high: number }>;
-    finishMultipliers?: Record<string, number>;
-    breakdown: string[];
-    summaries: Record<string, string>;
-  }>;
-
-  const type   = answers.projectType ?? "Other";
-  const size   = answers.size        ?? "";
-  const finish = answers.finish      ?? "Not sure";
-
-  const typePricing = pricing[type] ?? pricing["Other"];
-
-  // Find matching range key (first key that fits, fallback to last)
-  const rangeKeys = Object.keys(typePricing.ranges);
-  const rangeKey  = rangeKeys.find((k) => k === size) ?? rangeKeys[rangeKeys.length - 1];
-  const base      = typePricing.ranges[rangeKey];
-
-  // Apply finish multiplier if applicable
-  const multiplier = typePricing.finishMultipliers?.[finish] ?? 1.0;
-  const low  = Math.round(base.low  * multiplier);
-  const high = Math.round(base.high * multiplier);
-
-  const summary = typePricing.summaries[rangeKey] ?? "";
-
-  return { low, high, summary, breakdown: typePricing.breakdown };
-}
-
-/* ─── Utility ───────────────────────────────────────────────────────── */
-function fmt(n: number) {
-  return n.toLocaleString("en-US");
-}
+const baseQuestions: QuestionNode[]                     = CONTENT.quoteBot.baseQuestions as QuestionNode[];
+const adaptiveQuestions: Record<string, QuestionNode[]> = CONTENT.quoteBot.adaptiveQuestions as Record<string, QuestionNode[]>;
+const sharedTailQuestions: QuestionNode[]               = CONTENT.quoteBot.sharedTailQuestions as QuestionNode[];
 
 /* ─── Typewriter hook ───────────────────────────────────────────────── */
-function useTypewriter(text: string, speed = 18, enabled = true) {
+function useTypewriter(text: string, speed = 16, enabled = true) {
   const [displayed, setDisplayed] = useState(enabled ? "" : text);
-  const [done, setDone] = useState(!enabled);
 
   useEffect(() => {
-    if (!enabled) { setDisplayed(text); setDone(true); return; }
+    if (!enabled) { setDisplayed(text); return; }
     setDisplayed("");
-    setDone(false);
     let i = 0;
     const id = setInterval(() => {
       i++;
       setDisplayed(text.slice(0, i));
-      if (i >= text.length) { clearInterval(id); setDone(true); }
+      if (i >= text.length) clearInterval(id);
     }, speed);
     return () => clearInterval(id);
   }, [text, speed, enabled]);
 
-  return { displayed, done };
+  return displayed;
 }
 
 /* ─── TypingDots ────────────────────────────────────────────────────── */
 function TypingDots() {
   return (
-    <div className="flex gap-1 items-center px-5 py-4" style={{ background: "var(--bg-card)", borderRadius: "12px", borderTopLeftRadius: "2px", width: "fit-content" }}>
+    <div
+      className="flex gap-1 items-center px-5 py-4"
+      style={{ background: "var(--bg-card)", borderRadius: "12px", borderTopLeftRadius: "2px", width: "fit-content" }}
+    >
       {[0, 1, 2].map((i) => (
         <span
           key={i}
@@ -104,7 +57,7 @@ function TypingDots() {
             width: 7, height: 7, borderRadius: "50%",
             background: "var(--accent)",
             display: "inline-block",
-            animation: "dotBounce 1s ease-in-out " + (i * 0.2) + "s infinite",
+            animation: `dotBounce 1s ease-in-out ${i * 0.2}s infinite`,
           }}
         />
       ))}
@@ -113,8 +66,8 @@ function TypingDots() {
 }
 
 /* ─── BotBubble ─────────────────────────────────────────────────────── */
-function BotBubble({ text, animate = true }: { text: string; animate?: boolean }) {
-  const { displayed } = useTypewriter(text, 16, animate);
+function BotBubble({ text, animate }: { text: string; animate: boolean }) {
+  const displayed = useTypewriter(text, 16, animate);
   return (
     <div className="flex gap-3">
       <div
@@ -123,10 +76,7 @@ function BotBubble({ text, animate = true }: { text: string; animate?: boolean }
       >
         CM
       </div>
-      <div
-        className="rounded-xl rounded-tl-none px-5 py-4 flex-1"
-        style={{ background: "var(--bg-card)" }}
-      >
+      <div className="rounded-xl rounded-tl-none px-5 py-4 flex-1" style={{ background: "var(--bg-card)" }}>
         <p className="text-white text-sm font-medium leading-relaxed" style={{ minHeight: "1.4em" }}>
           {displayed}
           <span style={{ opacity: 0.4 }}>▋</span>
@@ -139,28 +89,24 @@ function BotBubble({ text, animate = true }: { text: string; animate?: boolean }
 /* ─── Main Component ────────────────────────────────────────────────── */
 export default function QuoteBot() {
   const [step, setStep]               = useState<Step>("intro");
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers]         = useState<Partial<Answers>>({});
-  const [textInput, setTextInput]     = useState("");
-  const [result, setResult]           = useState<QuoteResult | null>(null);
   const [questions, setQuestions]     = useState<QuestionNode[]>([]);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers]         = useState<Answers>({});
+  const [textInput, setTextInput]     = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [isTyping, setIsTyping]       = useState(false);
-
-  // Email capture
-  const [email, setEmail]         = useState("");
-  const [emailSent, setEmailSent] = useState(false);
 
   const currentQuestion = questions[questionIndex];
 
   const progress =
-    step === "questions" ? ((questionIndex) / Math.max(questions.length, 1)) * 100
-    : step === "result"  ? 100
+    step === "questions" ? (questionIndex / Math.max(questions.length, 1)) * 100
+    : step === "done"    ? 100
     : 0;
 
   function startQuestions() {
     setQuestions(baseQuestions);
     setQuestionIndex(0);
+    setAnswers({});
     setShowOptions(false);
     setIsTyping(true);
     setStep("questions");
@@ -175,21 +121,20 @@ export default function QuoteBot() {
       const adaptive = adaptiveQuestions[value] ?? adaptiveQuestions["Other"];
       const fullList = [...baseQuestions, ...adaptive, ...sharedTailQuestions];
       setQuestions(fullList);
-      advance(updated, fullList, 0);
+      advance(fullList, 0);
     } else {
-      advance(updated, questions, questionIndex);
+      advance(questions, questionIndex);
     }
   }
 
   function handleTextSubmit() {
     if (currentQuestion.type === "text" && !textInput.trim()) return;
-    const updated = { ...answers, [currentQuestion.key]: textInput.trim() };
-    setAnswers(updated);
+    setAnswers((prev) => ({ ...prev, [currentQuestion.key]: textInput.trim() }));
     setTextInput("");
-    advance(updated, questions, questionIndex);
+    advance(questions, questionIndex);
   }
 
-  function advance(updated: Partial<Answers>, qList: QuestionNode[], currentIdx: number) {
+  function advance(qList: QuestionNode[], currentIdx: number) {
     setShowOptions(false);
     setIsTyping(true);
 
@@ -200,30 +145,21 @@ export default function QuoteBot() {
         setShowOptions(true);
       }, 700);
     } else {
+      // All questions answered — log answers and show confirmation
+      // TODO: send `answers` to your backend/CRM here when ready
       setTimeout(() => {
         setIsTyping(false);
-        setResult(computeResult(updated));
-        setStep("result");
+        setStep("done");
       }, 700);
     }
   }
 
-  function handleEmailSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
-    console.log("[QuoteBot] Lead:", email, answers, result);
-    setEmailSent(true);
-  }
-
   function handleReset() {
     setStep("intro");
+    setQuestions([]);
     setQuestionIndex(0);
     setAnswers({});
     setTextInput("");
-    setResult(null);
-    setEmail("");
-    setEmailSent(false);
-    setQuestions([]);
     setShowOptions(false);
     setIsTyping(false);
   }
@@ -244,6 +180,7 @@ export default function QuoteBot() {
 
       <section id="quote-bot" className="section-padding" style={{ background: "var(--bg-primary)" }}>
         <div className="section-container px-4 md:px-6">
+
           {/* Header */}
           <div className="text-center mb-12">
             <p className="section-label">{CONTENT.quoteBot.intro.label}</p>
@@ -251,7 +188,7 @@ export default function QuoteBot() {
             <p className="section-subtitle mx-auto">{CONTENT.quoteBot.intro.subtitle}</p>
           </div>
 
-          {/* Bot card */}
+          {/* Card */}
           <div
             className="mx-auto rounded-2xl overflow-hidden"
             style={{
@@ -286,7 +223,9 @@ export default function QuoteBot() {
                   >
                     <span className="font-display text-3xl md:text-4xl" style={{ color: "var(--accent)" }}>?</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white mb-3">{CONTENT.quoteBot.intro.cardTitle}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
+                    {CONTENT.quoteBot.intro.cardTitle}
+                  </h3>
                   <p className="text-sm mb-8" style={{ color: "var(--text-secondary)" }}>
                     {CONTENT.quoteBot.intro.cardSubtitle}
                   </p>
@@ -332,11 +271,7 @@ export default function QuoteBot() {
                               key={opt}
                               onClick={() => handleChoice(opt)}
                               className="text-left px-5 py-4 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
-                              style={{
-                                background: "var(--bg-card)",
-                                color: "#F1F5F9",
-                                border: "1px solid var(--border)",
-                              }}
+                              style={{ background: "var(--bg-card)", color: "#F1F5F9", border: "1px solid var(--border)" }}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.borderColor = "var(--accent)";
                                 e.currentTarget.style.color = "#FFFFFF";
@@ -391,99 +326,40 @@ export default function QuoteBot() {
                 </div>
               )}
 
-              {/* ── RESULT ── */}
-              {step === "result" && result && (
-                <div className="fade-in">
+              {/* ── DONE ── */}
+              {step === "done" && (
+                <div className="text-center fade-in">
+                  <div
+                    className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                    style={{ background: "rgba(159,27,30,0.12)", border: "1px solid rgba(159,27,30,0.25)" }}
+                  >
+                    <CheckCircle size={36} style={{ color: "var(--accent)" }} />
+                  </div>
+
                   <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--accent)" }}>
                     {CONTENT.quoteBot.result.badge}
                   </p>
-
-                  {/* Price range */}
-                  <div className="mb-4">
-                    <p
-                      className="font-mono-price font-bold leading-none"
-                      style={{ fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#FFFFFF" }}
-                    >
-                      ${fmt(result.low)}
-                      <span style={{ color: "var(--text-secondary)" }}> — </span>
-                      ${fmt(result.high)}
-                    </p>
-                  </div>
-
-                  {/* Summary */}
-                  <p className="text-sm mb-5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                    {result.summary}
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
+                    {CONTENT.quoteBot.result.title}
+                  </h3>
+                  <p className="text-sm mb-8 mx-auto" style={{ color: "var(--text-secondary)", maxWidth: "420px", lineHeight: 1.7 }}>
+                    {CONTENT.quoteBot.result.subtitle}
                   </p>
 
-                  {/* Cost drivers */}
-                  {result.breakdown.length > 0 && (
-                    <div className="mb-6 rounded-xl p-4 flex flex-col gap-2" style={{ background: "var(--bg-card)" }}>
-                      <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#64748B" }}>
-                        {CONTENT.quoteBot.result.costFactorsLabel}
-                      </p>
-                      {result.breakdown.map((item, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <span style={{ color: "var(--accent)", marginTop: "2px", fontSize: "12px" }}>▸</span>
-                          <p className="text-sm" style={{ color: "#CBD5E1" }}>{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* CTAs */}
-                  <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                    <a id="result-call-cta" href="tel:+15550000000" className="btn-primary flex-1 justify-center">
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                    <a href="tel:+15550000000" className="btn-primary justify-center">
                       <Phone size={16} />
                       {CONTENT.quoteBot.result.callCTA}
                     </a>
-                    <button
-                      onClick={() => document.getElementById("result-email-section")?.scrollIntoView({ behavior: "smooth" })}
-                      className="btn-outline flex-1 justify-center"
-                    >
+                    <a href="mailto:info@concretemls.com" className="btn-outline justify-center">
                       <Mail size={16} />
                       {CONTENT.quoteBot.result.emailCTA}
-                    </button>
-                  </div>
-
-                  {/* Email capture */}
-                  <div id="result-email-section" className="rounded-xl p-6" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
-                    {!emailSent ? (
-                      <form onSubmit={handleEmailSubmit}>
-                        <p className="text-sm font-medium text-white mb-3">{CONTENT.quoteBot.result.formTitle}</p>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder={CONTENT.quoteBot.result.formPlaceholder}
-                            required
-                            className="flex-1 px-4 py-3 rounded-lg text-sm text-white outline-none transition-all"
-                            style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}
-                            onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-                            onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-                          />
-                          <button id="email-submit-btn" type="submit" className="btn-primary flex-shrink-0 text-sm px-5 py-3 justify-center">
-                            {CONTENT.quoteBot.result.formButton}
-                          </button>
-                        </div>
-                      </form>
-                    ) : (
-                      <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>
-                        {CONTENT.quoteBot.result.successMessage}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-5 flex items-start gap-2">
-                    <TriangleAlert size={12} style={{ color: "#64748B", marginTop: "2px", flexShrink: 0 }} />
-                    <p className="text-xs leading-relaxed" style={{ color: "#64748B" }}>
-                      {CONTENT.quoteBot.result.disclaimer}
-                    </p>
+                    </a>
                   </div>
 
                   <button
                     onClick={handleReset}
-                    className="mt-4 text-xs cursor-pointer hover:text-white transition-colors"
+                    className="text-xs cursor-pointer hover:text-white transition-colors"
                     style={{ color: "#64748B" }}
                   >
                     {CONTENT.quoteBot.result.startOverText}

@@ -202,8 +202,8 @@ export const CONTENT = {
     intro: {
       label: "Free Estimate",
       title: "Get Your Free Concrete Estimate",
-      subtitle: "Answer a few quick questions and we'll give you a price range based on your project — no calls, no commitment.",
-      cardTitle: "Ready for your estimate?",
+      subtitle: "Answer a few quick questions and we'll get back to you with a detailed quote — no calls, no commitment.",
+      cardTitle: "Ready to get started?",
       cardSubtitle: "Takes less than 2 minutes.",
       button: "Start My Free Quote"
     },
@@ -214,133 +214,12 @@ export const CONTENT = {
       continueButton: "Continue"
     },
     result: {
-      badge: "Your Estimate",
-      costFactorsLabel: "Key cost factors",
-      callCTA: "Call to Confirm",
-      emailCTA: "Get Detailed Quote by Email",
-      formTitle: "Send me the full quote breakdown",
-      formPlaceholder: "Your email address",
-      formButton: "Send",
-      successMessage: "✓  We'll reach out within 24 hours with your detailed quote.",
-      disclaimer: "This is a reference estimate based on typical market rates. Final pricing depends on a site inspection and may vary based on concrete mix, reinforcement, site conditions, and scope of work.",
-      startOverText: "Start over →",
-    },
-    errorMsg: "Something went wrong. Please try again.",
-    /* ─── Static pricing table ──────────────────────────────────────────
-       Keys mirror the projectType options and size options in the question
-       tree below. The component reads these directly — no API call needed.
-    ─────────────────────────────────────────────────────────────────── */
-    pricing: {
-      "Driveway / Parking": {
-        ranges: {
-          "Small (under 500 sq ft)":   { low: 2500,  high: 5500  },
-          "Medium (500–1,500 sq ft)":  { low: 5500,  high: 13000 },
-          "Large (1,500+ sq ft)":      { low: 13000, high: 32000 },
-        },
-        finishMultipliers: {
-          "Standard broom finish":  1.0,
-          "Stamped concrete":       1.55,
-          "Exposed aggregate":      1.30,
-          "Not sure":               1.0,
-        },
-        breakdown: [
-          "Concrete mix grade and thickness (4\" vs 6\")",
-          "Site excavation, grading, and base preparation",
-          "Finish type — stamped and decorative add significant cost",
-          "Rebar or wire mesh reinforcement",
-          "Expansion joints and edge forming",
-        ],
-        summaries: {
-          "Small (under 500 sq ft)":  "Typical for a single-car driveway apron or small parking pad.",
-          "Medium (500–1,500 sq ft)": "Covers a standard residential driveway or small commercial parking area.",
-          "Large (1,500+ sq ft)":     "Suitable for large residential driveways, multi-vehicle pads, or commercial parking.",
-        },
-      },
-      "Foundation / Slab": {
-        ranges: {
-          "Under 1,000 sq ft":    { low: 4500,  high: 9500   },
-          "1,000–3,000 sq ft":    { low: 9500,  high: 24000  },
-          "3,000–8,000 sq ft":    { low: 24000, high: 60000  },
-          "8,000+ sq ft":         { low: 60000, high: 130000 },
-        },
-        breakdown: [
-          "Soil prep, grading, and compaction",
-          "Vapor barrier and insulation layer",
-          "Rebar or post-tension cable layout",
-          "Concrete mix design and pour volume",
-          "Curing time and finishing treatment",
-        ],
-        summaries: {
-          "Under 1,000 sq ft":  "Typical for a garage slab, workshop, or small addition.",
-          "1,000–3,000 sq ft":  "Covers most single-family residential foundations.",
-          "3,000–8,000 sq ft":  "Typical for large homes, light commercial, or multi-unit foundations.",
-          "8,000+ sq ft":       "Large commercial slab or multi-structure development.",
-        },
-      },
-      "Retaining Wall": {
-        ranges: {
-          "Short (under 50 linear ft)":  { low: 3000,  high: 9000  },
-          "Medium (50–150 linear ft)":   { low: 9000,  high: 28000 },
-          "Long (150+ linear ft)":       { low: 28000, high: 70000 },
-        },
-        breakdown: [
-          "Wall height — taller walls require deeper footings and more material",
-          "Drainage aggregate and drainage pipe behind the wall",
-          "Footing depth and reinforcement",
-          "Concrete block (CMU) vs. poured concrete cost difference",
-          "Backfill and compaction after installation",
-        ],
-        summaries: {
-          "Short (under 50 linear ft)":  "Common for residential yard grading or small slope correction.",
-          "Medium (50–150 linear ft)":   "Typical for property-line walls, terracing, or commercial lot edges.",
-          "Long (150+ linear ft)":       "Large-scale grading, embankment stabilization, or commercial projects.",
-        },
-      },
-      "Patio / Walkway": {
-        ranges: {
-          "Small (under 300 sq ft)":  { low: 1500, high: 4500  },
-          "Medium (300–800 sq ft)":   { low: 4500, high: 11000 },
-          "Large (800+ sq ft)":       { low: 11000, high: 27000 },
-        },
-        finishMultipliers: {
-          "Standard broom finish":  1.0,
-          "Stamped / decorative":   1.45,
-          "Exposed aggregate":      1.25,
-          "Colored concrete":       1.20,
-          "Not sure":               1.0,
-        },
-        breakdown: [
-          "Base preparation and compaction",
-          "Concrete thickness — patios typically 4\", entry walks 3.5\"",
-          "Finish and texture type",
-          "Integral color or surface stain (if applicable)",
-          "Edge detailing and control joints",
-        ],
-        summaries: {
-          "Small (under 300 sq ft)":  "Ideal for a small patio, front entry, or garden path.",
-          "Medium (300–800 sq ft)":   "Typical backyard patio, side walkway, or pool surround.",
-          "Large (800+ sq ft)":       "Large outdoor entertainment area, commercial walkway, or courtyard.",
-        },
-      },
-      "Other": {
-        ranges: {
-          "Small (under 500 sq ft)":   { low: 1500,  high: 5500  },
-          "Medium (500–1,500 sq ft)":  { low: 5500,  high: 16000 },
-          "Large (1,500+ sq ft)":      { low: 16000, high: 45000 },
-        },
-        breakdown: [
-          "Project type and complexity",
-          "Volume of concrete required",
-          "Site access and preparation",
-          "Forming and finishing requirements",
-          "Location and local labor rates",
-        ],
-        summaries: {
-          "Small (under 500 sq ft)":   "Small custom concrete scope.",
-          "Medium (500–1,500 sq ft)":  "Mid-size custom or specialty concrete project.",
-          "Large (1,500+ sq ft)":      "Large custom concrete scope — site visit recommended.",
-        },
-      },
+      badge: "Request Sent",
+      title: "We've got your info!",
+      subtitle: "A Concrete MLS team member will reach out within 24 hours to discuss your project and provide a detailed quote.",
+      callCTA: "Call Us Now",
+      emailCTA: "Send Us an Email",
+      startOverText: "Submit another request →",
     },
     baseQuestions: [
       {
@@ -458,6 +337,12 @@ export const CONTENT = {
         text: "Any additional details you'd like us to know?",
         placeholder: "Optional — soil conditions, access issues, special requirements",
         type: "text-optional",
+      },
+      {
+        key: "contact",
+        text: "Last step — what's the best way to reach you?",
+        placeholder: "Email or phone number",
+        type: "text",
       },
     ]
   }
