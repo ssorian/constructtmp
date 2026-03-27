@@ -1,35 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Loader2, ArrowRight, Phone, Mail, TriangleAlert, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, ArrowRight, Phone, Mail, TriangleAlert } from "lucide-react";
 import { CONTENT } from "@/lib/content";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
-type Step = "intro" | "questions" | "loading" | "result";
-
-interface Message {
-  role: "bot" | "user";
-  text: string;
-}
+type Step = "intro" | "questions" | "result";
 
 interface QuoteResult {
   low: number;
   high: number;
   summary: string;
   breakdown: string[];
-  followUpHint: string;
 }
 
 interface Answers {
   projectType: string;
   size: string;
+  finish?: string;
   timeline: string;
   location: string;
   notes: string;
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
-/* ─── Adaptive question trees ───────────────────────────────────────── */
+/* ─── Question tree ─────────────────────────────────────────────────── */
 type QuestionNode = {
   key: string;
   text: string;
@@ -38,11 +33,39 @@ type QuestionNode = {
   placeholder?: string;
 };
 
-const baseQuestions: QuestionNode[] = CONTENT.quoteBot.baseQuestions as QuestionNode[];
+const baseQuestions: QuestionNode[]                        = CONTENT.quoteBot.baseQuestions as QuestionNode[];
+const adaptiveQuestions: Record<string, QuestionNode[]>    = CONTENT.quoteBot.adaptiveQuestions as Record<string, QuestionNode[]>;
+const sharedTailQuestions: QuestionNode[]                  = CONTENT.quoteBot.sharedTailQuestions as QuestionNode[];
 
-const adaptiveQuestions: Record<string, QuestionNode[]> = CONTENT.quoteBot.adaptiveQuestions as Record<string, QuestionNode[]>;
+/* ─── Static estimate calculator ───────────────────────────────────── */
+function computeResult(answers: Partial<Answers>): QuoteResult {
+  const pricing = CONTENT.quoteBot.pricing as Record<string, {
+    ranges: Record<string, { low: number; high: number }>;
+    finishMultipliers?: Record<string, number>;
+    breakdown: string[];
+    summaries: Record<string, string>;
+  }>;
 
-const sharedTailQuestions: QuestionNode[] = CONTENT.quoteBot.sharedTailQuestions as QuestionNode[];
+  const type   = answers.projectType ?? "Other";
+  const size   = answers.size        ?? "";
+  const finish = answers.finish      ?? "Not sure";
+
+  const typePricing = pricing[type] ?? pricing["Other"];
+
+  // Find matching range key (first key that fits, fallback to last)
+  const rangeKeys = Object.keys(typePricing.ranges);
+  const rangeKey  = rangeKeys.find((k) => k === size) ?? rangeKeys[rangeKeys.length - 1];
+  const base      = typePricing.ranges[rangeKey];
+
+  // Apply finish multiplier if applicable
+  const multiplier = typePricing.finishMultipliers?.[finish] ?? 1.0;
+  const low  = Math.round(base.low  * multiplier);
+  const high = Math.round(base.high * multiplier);
+
+  const summary = typePricing.summaries[rangeKey] ?? "";
+
+  return { low, high, summary, breakdown: typePricing.breakdown };
+}
 
 /* ─── Utility ───────────────────────────────────────────────────────── */
 function fmt(n: number) {
@@ -98,7 +121,7 @@ function BotBubble({ text, animate = true }: { text: string; animate?: boolean }
         className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
         style={{ background: "var(--accent)", color: "#FFFFFF" }}
       >
-        BR
+        CM
       </div>
       <div
         className="rounded-xl rounded-tl-none px-5 py-4 flex-1"
@@ -113,134 +136,28 @@ function BotBubble({ text, animate = true }: { text: string; animate?: boolean }
   );
 }
 
-/* ─── Chat Follow-up ────────────────────────────────────────────────── */
-function FollowUpChat({ answers, result }: { answers: Partial<Answers>; result: QuoteResult }) {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "bot", text: result.followUpHint },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [typing, setTyping] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typing]);
-
-  async function sendMessage() {
-    const trimmed = input.trim();
-    if (!trimmed || loading) return;
-    const newMessages: Message[] = [...messages, { role: "user", text: trimmed }];
-    setMessages(newMessages);
-    setInput("");
-    setTyping(true);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers,
-          result,
-          messages: newMessages,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "API error");
-
-      const reply = data.reply || CONTENT.quoteBot.result.followUp.defaultReply;
-      setTyping(false);
-      setMessages((prev) => [...prev, { role: "bot", text: reply }]);
-    } catch {
-      setTyping(false);
-      setMessages((prev) => [...prev, { role: "bot", text: CONTENT.quoteBot.result.followUp.errorReply }]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="mt-8" style={{ borderTop: "1px solid var(--border)", paddingTop: "24px" }}>
-      <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--accent)" }}>
-        {CONTENT.quoteBot.result.followUp.title}
-      </p>
-      <div className="flex flex-col gap-4 mb-4" style={{ maxHeight: 320, overflowY: "auto" }}>
-        {messages.map((m, i) => (
-          m.role === "bot" ? (
-            <BotBubble key={i} text={m.text} animate={i === messages.length - 1 && i > 0} />
-          ) : (
-            <div key={i} className="flex justify-end">
-              <div
-                className="rounded-xl rounded-tr-none px-5 py-3 text-sm"
-                style={{ background: "var(--accent)", color: "#FFFFFF", maxWidth: "80%" }}
-              >
-                {m.text}
-              </div>
-            </div>
-          )
-        ))}
-        {typing && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold" style={{ background: "var(--accent)", color: "#FFFFFF" }}>BR</div>
-            <TypingDots />
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder={CONTENT.quoteBot.result.followUp.inputPlaceholder}
-          disabled={loading}
-          className="flex-1 px-4 py-3 rounded-xl text-sm text-white outline-none"
-          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={loading || !input.trim()}
-          className="btn-primary px-4 py-3"
-          style={{ opacity: loading || !input.trim() ? 0.5 : 1 }}
-        >
-          <Send size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Main Component ────────────────────────────────────────────────── */
 export default function QuoteBot() {
-  const [step, setStep] = useState<Step>("intro");
+  const [step, setStep]               = useState<Step>("intro");
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Partial<Answers>>({});
-  const [textInput, setTextInput] = useState("");
-  const [result, setResult] = useState<QuoteResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<QuestionNode[]>([]);
+  const [answers, setAnswers]         = useState<Partial<Answers>>({});
+  const [textInput, setTextInput]     = useState("");
+  const [result, setResult]           = useState<QuoteResult | null>(null);
+  const [questions, setQuestions]     = useState<QuestionNode[]>([]);
   const [showOptions, setShowOptions] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping]       = useState(false);
 
   // Email capture
-  const [email, setEmail] = useState("");
+  const [email, setEmail]         = useState("");
   const [emailSent, setEmailSent] = useState(false);
 
   const currentQuestion = questions[questionIndex];
 
   const progress =
-    step === "questions"
-      ? ((questionIndex) / Math.max(questions.length, 1)) * 100
-      : step === "loading" ? 95
-        : step === "result" ? 100
-          : 0;
+    step === "questions" ? ((questionIndex) / Math.max(questions.length, 1)) * 100
+    : step === "result"  ? 100
+    : 0;
 
-  // When entering questions, build the base question list
   function startQuestions() {
     setQuestions(baseQuestions);
     setQuestionIndex(0);
@@ -254,27 +171,25 @@ export default function QuoteBot() {
     const updated = { ...answers, [currentQuestion.key]: value };
     setAnswers(updated);
 
-    // If this is the first question (projectType), inject adaptive questions
     if (currentQuestion.key === "projectType") {
-      const adaptive = adaptiveQuestions[value] || adaptiveQuestions["Other"];
+      const adaptive = adaptiveQuestions[value] ?? adaptiveQuestions["Other"];
       const fullList = [...baseQuestions, ...adaptive, ...sharedTailQuestions];
       setQuestions(fullList);
-      advanceWithQuestions(updated, fullList, 0);
+      advance(updated, fullList, 0);
     } else {
-      advanceWithQuestions(updated, questions, questionIndex);
+      advance(updated, questions, questionIndex);
     }
   }
 
   function handleTextSubmit() {
     if (currentQuestion.type === "text" && !textInput.trim()) return;
-    const val = textInput.trim();
-    const updated = { ...answers, [currentQuestion.key]: val };
+    const updated = { ...answers, [currentQuestion.key]: textInput.trim() };
     setAnswers(updated);
     setTextInput("");
-    advanceWithQuestions(updated, questions, questionIndex);
+    advance(updated, questions, questionIndex);
   }
 
-  function advanceWithQuestions(updated: Partial<Answers>, qList: QuestionNode[], currentIdx: number) {
+  function advance(updated: Partial<Answers>, qList: QuestionNode[], currentIdx: number) {
     setShowOptions(false);
     setIsTyping(true);
 
@@ -283,37 +198,14 @@ export default function QuoteBot() {
         setIsTyping(false);
         setQuestionIndex(currentIdx + 1);
         setShowOptions(true);
-      }, 800);
+      }, 700);
     } else {
-      // Submit
-      setTimeout(async () => {
+      setTimeout(() => {
         setIsTyping(false);
-        setStep("loading");
-        try {
-          const aiResult = await generateQuoteWithAI(updated);
-          setResult(aiResult);
-          setStep("result");
-        } catch {
-          setError(CONTENT.quoteBot.errorMsg);
-          setStep("questions");
-          setIsTyping(false);
-          setShowOptions(true);
-        }
-      }, 800);
+        setResult(computeResult(updated));
+        setStep("result");
+      }, 700);
     }
-  }
-
-  async function generateQuoteWithAI(ans: Partial<Answers>): Promise<QuoteResult> {
-    const res = await fetch("/api/quote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers: ans }),
-    });
-
-    if (!res.ok) throw new Error("API error");
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
   }
 
   function handleEmailSubmit(e: React.FormEvent) {
@@ -329,7 +221,6 @@ export default function QuoteBot() {
     setAnswers({});
     setTextInput("");
     setResult(null);
-    setError(null);
     setEmail("");
     setEmailSent(false);
     setQuestions([]);
@@ -357,9 +248,7 @@ export default function QuoteBot() {
           <div className="text-center mb-12">
             <p className="section-label">{CONTENT.quoteBot.intro.label}</p>
             <h2 className="section-title">{CONTENT.quoteBot.intro.title}</h2>
-            <p className="section-subtitle mx-auto">
-              {CONTENT.quoteBot.intro.subtitle}
-            </p>
+            <p className="section-subtitle mx-auto">{CONTENT.quoteBot.intro.subtitle}</p>
           </div>
 
           {/* Bot card */}
@@ -393,12 +282,12 @@ export default function QuoteBot() {
                 <div className="text-center fade-in">
                   <div
                     className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-                    style={{ background: "rgba(226,74,34,0.12)", border: "1px solid rgba(226,74,34,0.25)" }}
+                    style={{ background: "rgba(159,27,30,0.12)", border: "1px solid rgba(159,27,30,0.25)" }}
                   >
                     <span className="font-display text-3xl md:text-4xl" style={{ color: "var(--accent)" }}>?</span>
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold text-white mb-3">{CONTENT.quoteBot.intro.cardTitle}</h3>
-                  <p className="text-sm mb-8" style={{ color: "#94A3B8" }}>
+                  <p className="text-sm mb-8" style={{ color: "var(--text-secondary)" }}>
                     {CONTENT.quoteBot.intro.cardSubtitle}
                   </p>
                   <button
@@ -414,14 +303,13 @@ export default function QuoteBot() {
               {/* ── QUESTIONS ── */}
               {step === "questions" && currentQuestion && (
                 <div>
-                  {/* Typing indicator OR bot bubble */}
                   {isTyping ? (
                     <div className="flex gap-3 mb-6">
                       <div
                         className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
                         style={{ background: "var(--accent)", color: "#FFFFFF" }}
                       >
-                        BR
+                        CM
                       </div>
                       <TypingDots />
                     </div>
@@ -431,23 +319,10 @@ export default function QuoteBot() {
                     </div>
                   )}
 
-                  {/* Step counter */}
                   <p className="text-xs mb-5 text-right" style={{ color: "#64748B" }}>
                     {CONTENT.quoteBot.questions.progressPrefix} {questionIndex + 1} {CONTENT.quoteBot.questions.progressSeparator} {questions.length}
                   </p>
 
-                  {/* Error */}
-                  {error && (
-                    <div
-                      className="flex items-center gap-2 text-sm mb-4 px-4 py-3 rounded-lg"
-                      style={{ background: "rgba(147,0,10,0.2)", color: "#ffb4ab" }}
-                    >
-                      <TriangleAlert size={14} />
-                      {error}
-                    </div>
-                  )}
-
-                  {/* Options — only show when not typing */}
                   {showOptions && (
                     <div className="fade-in">
                       {currentQuestion.type === "choice" && (
@@ -496,7 +371,7 @@ export default function QuoteBot() {
                               <button
                                 onClick={() => { setTextInput(""); handleTextSubmit(); }}
                                 className="text-sm px-4 py-2 cursor-pointer transition-colors duration-200"
-                                style={{ color: "#94A3B8" }}
+                                style={{ color: "var(--text-secondary)" }}
                               >
                                 {CONTENT.quoteBot.questions.skipButton}
                               </button>
@@ -516,21 +391,6 @@ export default function QuoteBot() {
                 </div>
               )}
 
-              {/* ── LOADING ── */}
-              {step === "loading" && (
-                <div className="text-center py-8 fade-in">
-                  <Loader2
-                    size={40}
-                    className="mx-auto mb-5 animate-spin"
-                    style={{ color: "var(--accent)" }}
-                  />
-                  <p className="text-white font-medium text-lg mb-2">{CONTENT.quoteBot.loading.title}</p>
-                  <p className="text-sm" style={{ color: "#94A3B8" }}>
-                    {CONTENT.quoteBot.loading.subtitle}
-                  </p>
-                </div>
-              )}
-
               {/* ── RESULT ── */}
               {step === "result" && result && (
                 <div className="fade-in">
@@ -544,21 +404,23 @@ export default function QuoteBot() {
                       className="font-mono-price font-bold leading-none"
                       style={{ fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#FFFFFF" }}
                     >
-                      \${fmt(result.low)}
-                      <span style={{ color: "#94A3B8" }}> — </span>
-                      \${fmt(result.high)}
+                      ${fmt(result.low)}
+                      <span style={{ color: "var(--text-secondary)" }}> — </span>
+                      ${fmt(result.high)}
                     </p>
                   </div>
 
-                  {/* Personalized AI summary */}
-                  <p className="text-sm mb-5 leading-relaxed" style={{ color: "#94A3B8" }}>
+                  {/* Summary */}
+                  <p className="text-sm mb-5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {result.summary}
                   </p>
 
                   {/* Cost drivers */}
-                  {result.breakdown?.length > 0 && (
+                  {result.breakdown.length > 0 && (
                     <div className="mb-6 rounded-xl p-4 flex flex-col gap-2" style={{ background: "var(--bg-card)" }}>
-                      <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#64748B" }}>{CONTENT.quoteBot.result.costFactorsLabel}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#64748B" }}>
+                        {CONTENT.quoteBot.result.costFactorsLabel}
+                      </p>
                       {result.breakdown.map((item, i) => (
                         <div key={i} className="flex items-start gap-2">
                           <span style={{ color: "var(--accent)", marginTop: "2px", fontSize: "12px" }}>▸</span>
@@ -606,20 +468,19 @@ export default function QuoteBot() {
                         </div>
                       </form>
                     ) : (
-                      <p className="text-sm text-center" style={{ color: "#94A3B8" }}>
+                      <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>
                         {CONTENT.quoteBot.result.successMessage}
                       </p>
                     )}
                   </div>
 
-                    <div className="mt-5 flex items-start gap-2">
+                  <div className="mt-5 flex items-start gap-2">
                     <TriangleAlert size={12} style={{ color: "#64748B", marginTop: "2px", flexShrink: 0 }} />
                     <p className="text-xs leading-relaxed" style={{ color: "#64748B" }}>
                       {CONTENT.quoteBot.result.disclaimer}
                     </p>
                   </div>
 
-                  {/* Start over */}
                   <button
                     onClick={handleReset}
                     className="mt-4 text-xs cursor-pointer hover:text-white transition-colors"
@@ -627,11 +488,9 @@ export default function QuoteBot() {
                   >
                     {CONTENT.quoteBot.result.startOverText}
                   </button>
-
-                  {/* ── FOLLOW-UP CHAT ── */}
-                  <FollowUpChat answers={answers} result={result} />
                 </div>
               )}
+
             </div>
           </div>
         </div>
